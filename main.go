@@ -22,3 +22,7 @@ rb := httputil.NewSingleHostReverseProxy(u)
 //initialize server and add this as handler
 http.HandlerFunc(rp.ServeHTTP)
 
+//we need a count, this is because we want to skip dead backends 
+func (s *ServerPool) NextIndex() int {
+	return int(atomic.AddUint64(&s.current, uint64(1)) % uint64(len(s.backends)))
+}
