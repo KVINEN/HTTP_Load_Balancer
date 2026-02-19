@@ -65,9 +65,23 @@ func (s *ServerPool) GetNextPeer() *Backend {
 	return nil // nil = zero value in golang
 }
 
-// TODO: implement a way to avoid race conditions
-
 // SetAlive for the backend
-func (s *Backend) SetAlive(alive bool) {
-	b.mux.Lock
+func (b *Backend) SetAlive(alive bool) {
+	b.mux.Lock()
+	b.Alive = alive
+	b.mux.Unlock()
+}
+
+// IsAlive returns true when backend is alive
+func (b *Backend) IsAlive() (alive bool) {
+	b.mux.RLock()
+	alive = b.Alive
+	b.mux.RUnlock()
+	return
+}
+
+
+// TODO: Implement a mthod called lb to load balance incomming requests
+func lb(w http.ResponseWriter, r *http.Request) {
+	// TODO: complete the logic
 }
