@@ -1,6 +1,19 @@
 package main
 
-import("fmt")
+// imported libraries/packages
+import(
+	"sync" // this is a library package
+	"sync/atomic" // this is a library sub-package
+	"time"
+	"strings"
+	"net/url"
+	"net/http/httputil"
+	"net/http" 
+	"net" 
+	"log"
+	"flag"
+	"context"
+	"fmt")
 
 // struct to hold our backends
 type Backend struct {
@@ -50,4 +63,11 @@ func (s *ServerPool) GetNextPeer() *Backend {
 		}
 	}
 	return nil // nil = zero value in golang
+}
+
+// TODO: implement a way to avoid race conditions
+
+// SetAlive for the backend
+func (s *Backend) SetAlive(alive bool) {
+	b.mux.Lock
 }
