@@ -2,11 +2,20 @@ package main
 
 // imported libraries/packages
 import (
+	"context"
+	"fmt"
+	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"sync"        // this is a library package
 	"sync/atomic" // this is a library sub-package
+	"time"
+)
+
+const (
+	Attempts int = iota
+	Retry
 )
 
 // struct to hold our backends
@@ -50,7 +59,7 @@ func (s *ServerPool) GetNextPeer() *Backend {
 			if i != next {
 				atomic.StoreUint64(&s.current, uint64(idx)) // mark the current one
 			}
-			return s.backend[idx]
+			return s.backends[idx]
 		}
 	}
 	return nil // nil = zero value in golang
@@ -81,40 +90,34 @@ func lb(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Service not available", http.StatusServiceUnavailable)
 }
 
-/*
-server := http.Server {
-	Addr: fmt.Sprintf(":%d", port)
-	Handler: http.HandlerFunc(lb)
-}
-
-
-// atcively check for healty backends
-proxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, e error) {
-	log.Printf("[%s] %s\n", serverUrl.Host, e.Error())
-	retries := GetRetryFromContext(request)
-
-	// tries the backend 3 times
-	if retries < 3 {
-		select {
-		case <- time.After(10 * time.Millisecond):
-			ctx := context.WithValue(request.Context(), Retry, retries + 1)
-			proxy.ServeHTTP(write, request.WithContext(ctx))
-		}
-		return
+// return retries for request
+func GetRetryFromContext(r *http.Request) int {
+	if retry, ok := r.Context().Value(Retry).(int); ok {
+		return retry
 	}
-
-	// after 3 tries mark backend as down
-	ServerPool.MarkBackendStatus(serverUrl, false)
-
-	// if the same request routing for few attempts with different backends, increase the count
-	attemps := GetAttampetsForContext(request)
-	log.Printf("%s(%s) Attampting retry %d\n", request.RemoteAddr, request.URL.Path, attemps)
-	ctx := context.WithValue(request.Context(), Attempts, attemps + 1)
-	lb(writer, request.WithContext(ctx))
+	return 0
 }
-*/
+
+// changes the status of a backend
+func (s *ServerPool) MarkBackendStatus(backendURL *url.URL, alive bool) {
+	for _, b := range s.backends {
+		if b.URL.String() == backendURL.String() {
+			b.SetAlive(alive)
+			break
+		}
+	}
+}
+
+func GetAttampetsForContext(r *http.Request) int {
+	if attempts, ok := r.Context().Value(Attempts).(int); ok {
+		return attempts
+	}
+	return 1
+}
 
 func main() {
+
+	var port int
 
 	// define backend URLs
 	tokens := []string{"http://localhost:8081", "http://localhost:8082"}
@@ -131,5 +134,38 @@ func main() {
 			Alive:        true,
 			ReverseProxy: proxy,
 		})
+
+		proxy.ErrorHandler = func(writer http.ResponseWriter, request *http.Request, e error) {
+			log.Printf("[%s] %s\n", serverUrl.Host, e.Error())
+			retries := GetRetryFromContext(request)
+
+			// tries the backend 3 times
+			if retries < 3 {
+				select {
+				case <-time.After(10 * time.Millisecond):
+					ctx := context.WithValue(request.Context(), Retry, retries+1)
+					proxy.ServeHTTP(writer, request.WithContext(ctx))
+				}
+				return
+			}
+
+			// after 3 tries mark backend as down
+			serverPool.MarkBackendStatus(serverUrl, false)
+
+			// if the same request routing for few attempts with different backends, increase the count
+			attemps := GetAttampetsForContext(request)
+			log.Printf("%s(%s) Attampting retry %d\n", request.RemoteAddr, request.URL.Path, attemps)
+			ctx := context.WithValue(request.Context(), Attempts, attemps+1)
+			lb(writer, request.WithContext(ctx))
+		}
+	}
+
+	server := http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: http.HandlerFunc(lb),
+	}
+
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatal(err)
 	}
 }
