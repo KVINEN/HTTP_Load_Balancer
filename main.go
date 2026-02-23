@@ -3,6 +3,7 @@ package main
 // imported libraries/packages
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -115,9 +116,22 @@ func GetAttampetsForContext(r *http.Request) int {
 	return 1
 }
 
+func HealthCheckLoop() {
+	t := time.NewTicker(time.Minute * 2)
+	for {
+		select {
+		case <-t.C:
+			log.Println("Starting health check...")
+			serverPool.HealthCheck()
+			log.Println("Health check completed")
+		}
+	}
+}
+
 func main() {
 
-	var port int
+	port := flag.Int("port", 8080, "Port to server on")
+	flag.Parse()
 
 	// define backend URLs
 	tokens := []string{"http://localhost:8081", "http://localhost:8082"}
@@ -159,6 +173,8 @@ func main() {
 			lb(writer, request.WithContext(ctx))
 		}
 	}
+
+	go HealthCheckLoop()
 
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
