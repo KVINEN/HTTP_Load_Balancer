@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 	"sync"        // this is a library package
 	"sync/atomic" // this is a library sub-package
 	"time"
@@ -85,6 +86,7 @@ func (b *Backend) IsAlive() (alive bool) {
 func lb(w http.ResponseWriter, r *http.Request) {
 	peer := serverPool.GetNextPeer()
 	if peer != nil {
+		log.Printf("Proxying request to: %s\n", peer.URL.String())
 		peer.ReverseProxy.ServeHTTP(w, r)
 		return
 	}
@@ -130,11 +132,16 @@ func HealthCheckLoop() {
 
 func main() {
 
+	serverList := flag.String("backends", "", "Load balanced backends, use commas to separate")
 	port := flag.Int("port", 8080, "Port to server on")
 	flag.Parse()
 
+	if len(*serverList) == 0 {
+		log.Fatal("Please provide one or more backends to load balance")
+	}
+
 	// define backend URLs
-	tokens := []string{"http://localhost:8081", "http://localhost:8082"}
+	tokens := strings.Split(*serverList, ",")
 
 	for _, tok := range tokens {
 		serverUrl, _ := url.Parse(tok)
@@ -176,8 +183,9 @@ func main() {
 
 	go HealthCheckLoop()
 
+	fmt.Printf("Load Balancer started at :%d\n", *port)
 	server := http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
+		Addr:    fmt.Sprintf(":%d", *port),
 		Handler: http.HandlerFunc(lb),
 	}
 

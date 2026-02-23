@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"net/url"
+	"sync"
 	"time"
 )
 
@@ -22,15 +23,15 @@ func isBackendAlive(u *url.URL) bool {
 }
 
 func (s *ServerPool) HealthCheck() {
+	var wg sync.WaitGroup // create wate group
 	for _, b := range s.backends {
-		status := isBackendAlive(b.URL)
-		b.SetAlive(status)
+		wg.Add(1) // tell group we have one more task
+		go func(b *Backend) {
+			defer wg.Done()
+			alive := isBackendAlive(b.URL)
+			b.SetAlive(alive)
+		}(b)
 
-		msg := "ok"
-		if !status {
-			msg = "dead"
-		}
-
-		log.Printf("%s [%s]\n", b.URL, msg)
+		wg.Wait()
 	}
 }
