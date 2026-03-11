@@ -32,7 +32,7 @@ HTTP_Load_Balancer is a concurrent networking tool designed to distribute incomm
 └── README.md        # Project documentation
 ```
 
-##🚦 Getting Started
+## 🚦 Getting Started
 
 ### Prerequisites
 
@@ -53,6 +53,23 @@ You can verify the load balancer is working by sending requests to the configure
 curl http://localhost:8080
 ```
 The server will log which backend the request is being proxied to, or return a "Service not available" error if no backends are alive.
+
+## 🗺️ 2026 Challange Roadmap
+
+```
+Jan - Redis clone in C
+Feb - HTTP load balancer in Go/Golang
+Mar - CHIP-8 Emulator in C++
+Apr - Real-Time withboard in TypeScript
+May - Search Engine in Java
+Jun - Code Runner in Python
+Jul - LSM Tree storage in Rust
+Aug - Task Scheduler in C#(.NET)
+Sep - AI search in Python
+Oct - Password manager in Rust
+Nov- Blockchain in JavaScript
+Dec - ????? in ????? <- TBD
+```
 
 ## 📝 License
 
