@@ -71,6 +71,6 @@ Nov- Blockchain in JavaScript
 Dec - ????? in ????? <- TBD
 ```
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License.
