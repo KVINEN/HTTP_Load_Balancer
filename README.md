@@ -2,11 +2,11 @@
 
 A functional, Layer 7 HTTP Load Balancer prototype built in Go as part of my "1 New Project Every Month of 2026" challange.
 
-## 📅 The 2026 Challange
+## The 2026 Challange
 
 This project is Part 2 of 12 in my year-long journey to build different projects in 2026. The focus is on creating functional prototypes or MVPs (Minimum Viable Products) rather than 100% feature-complete applications.
 
-## 🚀 Overview
+## Overview
 
 HTTP_Load_Balancer is a concurrent networking tool designed to distribute incomming HTTP trafic across multiple  backend servers. It ensures high availablility by automatically skipping unhealthy backends and retrying failed requests.
 
@@ -16,13 +16,13 @@ HTTP_Load_Balancer is a concurrent networking tool designed to distribute incomm
 * **Dynamic Retries & Failover:** Automatically retries failed requests up to 3 times before marking a backend as down and routing to a new peer.
 * **Standard Library Design:** Built entirely using Go's standard library, leveraging ```net/http/httputil``` for reverse proxying and ```sync``` for concurrency management.
 
-## 🛠️ Technical Details
+## Technical Details
 * **Language:** Go 1.25.6
 * **Port:** Defaults to 8080 (configurable via flags).
 * **Concurrency:** Uses ```sync.RWMutex``` for safe state sharing and ```sync.WaitGroup``` for parallel health checks.
 * **Proxying:** Implements a custom ```ErrorHandler``` to manage backend failures and context-based retry tracking.
 
-## 🏗️ Project Structure
+## Project Structure
 ```
 .
 ├── main.go          # Entry point, reverse proxy logic, and server pool management
@@ -32,7 +32,7 @@ HTTP_Load_Balancer is a concurrent networking tool designed to distribute incomm
 └── README.md        # Project documentation
 ```
 
-## 🚦 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -54,7 +54,7 @@ curl http://localhost:8080
 ```
 The server will log which backend the request is being proxied to, or return a "Service not available" error if no backends are alive.
 
-## 🗺️ 2026 Challange Roadmap
+## 2026 Challange Roadmap
 
 ```
 Jan - Redis clone in C
