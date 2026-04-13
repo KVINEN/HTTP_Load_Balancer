@@ -1,11 +1,6 @@
 # HTTP_Load_Balancer
 
-A functional, Layer 7 HTTP Load Balancer prototype built in Go as part of my "1 New Project Every Month of 2026" challange.
-
-## The 2026 Challange
-
-This project is Part 2 of 12 in my year-long journey to build different projects in 2026. The focus is on creating functional prototypes or MVPs (Minimum Viable Products) rather than 100% feature-complete applications.
-
+A functional, Layer 7 HTTP Load Balancer prototype built in Go
 ## Overview
 
 HTTP_Load_Balancer is a concurrent networking tool designed to distribute incomming HTTP trafic across multiple  backend servers. It ensures high availablility by automatically skipping unhealthy backends and retrying failed requests.
@@ -54,22 +49,6 @@ curl http://localhost:8080
 ```
 The server will log which backend the request is being proxied to, or return a "Service not available" error if no backends are alive.
 
-## 2026 Challange Roadmap
-
-```
-Jan - Redis clone in C
-Feb - HTTP load balancer in Go/Golang
-Mar - CHIP-8 Emulator in C++
-Apr - Real-Time withboard in TypeScript
-May - Search Engine in Java
-Jun - Code Runner in Python
-Jul - LSM Tree storage in Rust
-Aug - Task Scheduler in C#(.NET)
-Sep - AI search in Python
-Oct - Password manager in Rust
-Nov- Blockchain in JavaScript
-Dec - ????? in ????? <- TBD
-```
 
 ## License
 
